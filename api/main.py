@@ -6,7 +6,7 @@ from typing import List, Optional
 from uuid import UUID, uuid4
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-
+import uvicorn
 app = FastAPI()
 
 # Enable CORS
@@ -113,3 +113,7 @@ def update_user(user_id: UUID, updated_user: User):
 @app.get("/")
 async def root():
     return {"Hello": "World"}
+
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=os.getenv("PORT", default=8000), log_level="info")
