@@ -97,6 +97,6 @@ def update_user(user_id: UUID, updated_user: User):
             return updated_user
     return {"error": "User not found"}
 
-
-if __name__ == "__main__":
-  uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+@app.get("/")
+async def root():
+    return {"Hello": "World"}
