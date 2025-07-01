@@ -1,11 +1,15 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
 from typing import List, Optional
 from uuid import UUID, uuid4
-import uvicorn
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+
 app = FastAPI()
 
+# Enable CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -14,7 +18,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Output model (includes id)
+base_dir = os.path.dirname(os.path.abspath(__file__))
+static_dir = os.path.join(os.path.dirname(base_dir), "static")
+favicon_path = os.path.join(static_dir, "favicon.ico")
+
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    return FileResponse(favicon_path)
+
+# --- User Models and Endpoints ---
+
 class User(BaseModel):
     id: UUID
     name: str
@@ -23,7 +38,6 @@ class User(BaseModel):
     company: Optional[str] = ""
     jobTitle: Optional[str] = ""
 
-# Input model (no id expected from frontend)
 class UserCreate(BaseModel):
     name: str
     surname: str
@@ -31,10 +45,9 @@ class UserCreate(BaseModel):
     company: Optional[str] = ""
     jobTitle: Optional[str] = ""
 
-# Mock database
 mock_users: List[User] = [
     User(
-        id="123e4567-e89b-12d3-a456-426614174000",
+        id=UUID("123e4567-e89b-12d3-a456-426614174000"),
         name="John",
         surname="Doe",
         email="john.doe@example.com",
